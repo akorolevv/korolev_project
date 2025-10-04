@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
-
 void main() {
   runApp(MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   @override
@@ -23,15 +21,45 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Определяем класс TextEditorsPage - основная страница приложения
-class TextEditorsPage extends StatelessWidget {
+// Изменяем на StatefulWidget для управления состоянием изображений
+class TextEditorsPage extends StatefulWidget {
+  @override
+  _TextEditorsPageState createState() => _TextEditorsPageState();
+}
+
+class _TextEditorsPageState extends State<TextEditorsPage> {
+  // Переменная для отслеживания текущего изображения
+  int currentImageIndex = 0;
+
+  // Список путей к изображениям
+  List<String> images = [
+    'assets/images/editor1.png',
+    'assets/images/editor2.png',
+    'assets/images/editor3.jpg',
+    'assets/images/editor4.jpg',
+    'assets/images/editor5.jpg',
+  ];
+
+  // Функция для циклической смены изображений
+  void changeImage() {
+    setState(() {
+      currentImageIndex = (currentImageIndex + 1) % images.length;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Scaffold - базовый каркас экрана
     return Scaffold(
-      // Настраиваем верхнюю панель приложения
+      // Настраиваем верхнюю панель приложения с кастомным шрифтом
       appBar: AppBar(
-        title: Text('Текстовые редакторы'),
+        title: Text(
+          'Текстовые редакторы',
+          style: TextStyle(
+            fontFamily: 'CustomFont', // Используем кастомный шрифт
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         // Центрируем заголовок
         centerTitle: true,
         // Устанавливаем зеленый фон для AppBar
@@ -56,13 +84,14 @@ class TextEditorsPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8.0),
                   border: Border.all(color: Colors.green),
                 ),
-                // Текст заголовка
+                // Текст заголовка с кастомным шрифтом
                 child: Text(
                   'Текстовые редакторы',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'CustomFont', // Используем кастомный шрифт
                     color: Colors.green.shade800,
                   ),
                 ),
@@ -95,22 +124,48 @@ class TextEditorsPage extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ЛЕВАЯ ЧАСТЬ: Изображение (иконка)
-                // Expanded заставляет виджет занять доступное пространство
+                // ЛЕВАЯ ЧАСТЬ: Изображение (заменяем иконку на изображения)
                 Expanded(
-                  // flex: 1 означает, что этот элемент займет 1 часть от доступного места
                   flex: 1,
-                  child: Container(
-                    height: 150,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.description,
-                        size: 80,
-                        color: Colors.green,
+                  child: GestureDetector(
+                    // Обработчик нажатия для смены изображения
+                    onTap: changeImage,
+                    child: Container(
+                      height: 150,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: Image.asset(
+                          images[currentImageIndex], // Отображаем текущее изображение
+                          fit: BoxFit.cover, // Изображение заполняет контейнер
+                          // Обработчик ошибки, если изображение не найдено
+                          errorBuilder: (context, error, stackTrace) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.error,
+                                    color: Colors.red,
+                                    size: 40,
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Изображение\nне найдено',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
@@ -120,7 +175,6 @@ class TextEditorsPage extends StatelessWidget {
 
                 // ПРАВАЯ ЧАСТЬ: Список примеров
                 Expanded(
-                  // Также занимает 1 часть пространства
                   flex: 1,
                   child: Container(
                     height: 150,
@@ -134,15 +188,30 @@ class TextEditorsPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Text('1. Microsoft Word', style: TextStyle(fontSize: 14)),
-                        Text('2. Google Docs', style: TextStyle(fontSize: 14)),
-                        Text('3. Notepad++', style: TextStyle(fontSize: 14)),
-                        Text('4. Sublime Text', style: TextStyle(fontSize: 14)),
+                        Text('1. FreeOffice', style: TextStyle(fontSize: 14)),
+                        Text('2. LibreOffice', style: TextStyle(fontSize: 14)),
+                        Text('3. WPSOffice', style: TextStyle(fontSize: 14)),
+                        Text('4. GoogleDocs', style: TextStyle(fontSize: 14)),
+                        Text('5. MicrosoftWord', style: TextStyle(fontSize: 14)),
                       ],
                     ),
                   ),
                 ),
               ],
+            ),
+
+            SizedBox(height: 20),
+
+            // Добавляем кнопку для альтернативного способа смены изображений
+            Center(
+              child: ElevatedButton(
+                onPressed: changeImage,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text('Сменить изображение (${currentImageIndex + 1}/${images.length})'),
+              ),
             ),
 
             SizedBox(height: 20),
