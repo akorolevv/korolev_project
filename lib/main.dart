@@ -8,75 +8,83 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Устанавливаем заголовок приложения (отображается в диспетчере задач)
+      debugShowCheckedModeBanner: false,
       title: 'Текстовые редакторы',
-      // Настраиваем тему приложения
       theme: ThemeData(
-        // Основной цвет приложения - зеленый
         primarySwatch: Colors.green,
       ),
-      // Устанавливаем домашнюю страницу приложения
       home: TextEditorsPage(),
     );
   }
 }
 
-// Изменяем на StatefulWidget для управления состоянием изображений
 class TextEditorsPage extends StatefulWidget {
   @override
   _TextEditorsPageState createState() => _TextEditorsPageState();
 }
 
 class _TextEditorsPageState extends State<TextEditorsPage> {
-  // Переменная для отслеживания текущего изображения
-  int currentImageIndex = 0;
-
-  // Список путей к изображениям
-  List<String> images = [
-    'assets/images/editor1.png',
-    'assets/images/editor2.png',
+  // Список путей к изображениям для горизонтального ListView
+  final List<String> images = [
+    'assets/images/editor1.jpg',
+    'assets/images/editor2.jpg',
     'assets/images/editor3.jpg',
     'assets/images/editor4.jpg',
     'assets/images/editor5.jpg',
   ];
 
-  // Функция для циклической смены изображений
-  void changeImage() {
-    setState(() {
-      currentImageIndex = (currentImageIndex + 1) % images.length;
-    });
-  }
+  // Список пунктов для вертикального ListView с карточками
+  final List<Map<String, dynamic>> items = [
+    {
+      'title': 'FreeOffice',
+      'description': 'Бесплатный офисный пакет для работы с документами',
+      'icon': Icons.description,
+    },
+    {
+      'title': 'LibreOffice',
+      'description': 'Открытый офисный пакет с широким функционалом',
+      'icon': Icons.library_books,
+    },
+    {
+      'title': 'WPS Office',
+      'description': 'Кроссплатформенный офисный пакет',
+      'icon': Icons.work,
+    },
+    {
+      'title': 'Google Docs',
+      'description': 'Онлайн-редактор документов от Google',
+      'icon': Icons.cloud,
+    },
+    {
+      'title': 'Microsoft Word',
+      'description': 'Профессиональный текстовый редактор',
+      'icon': Icons.edit_document,
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
-    // Scaffold - базовый каркас экрана
     return Scaffold(
-      // Настраиваем верхнюю панель приложения с кастомным шрифтом
       appBar: AppBar(
         title: Text(
-          'Текстовые редакторы',
+          'НАЗВАНИЕ ПРИЛОЖЕНИЯ',
           style: TextStyle(
-            fontFamily: 'CustomFont', // Используем кастомный шрифт
+            fontFamily: 'CustomFont',
             fontWeight: FontWeight.w700,
           ),
         ),
-        // Центрируем заголовок
         centerTitle: true,
-        // Устанавливаем зеленый фон для AppBar
         backgroundColor: Colors.green,
-        // Устанавливаем белый цвет текста в AppBar
         foregroundColor: Colors.white,
       ),
-      // Определяем основное содержимое экрана
       body: Padding(
-        // отступы со всех сторон по 16 пикселей
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Заголовок
             Center(
               child: Container(
-                // Растягиваем контейнер на всю ширину
                 width: double.infinity,
                 padding: EdgeInsets.all(12.0),
                 decoration: BoxDecoration(
@@ -84,24 +92,22 @@ class _TextEditorsPageState extends State<TextEditorsPage> {
                   borderRadius: BorderRadius.circular(8.0),
                   border: Border.all(color: Colors.green),
                 ),
-                // Текст заголовка с кастомным шрифтом
                 child: Text(
-                  'Текстовые редакторы',
+                  'Название ПО',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    fontFamily: 'CustomFont', // Используем кастомный шрифт
+                    fontFamily: 'CustomFont',
                     color: Colors.green.shade800,
                   ),
                 ),
               ),
             ),
 
-            // Добавляем вертикальный отступ 20 пикселей
             SizedBox(height: 20),
 
-            // БЛОК 2: Описание предметной области
+            // Описание ПО
             Container(
               width: double.infinity,
               padding: EdgeInsets.all(12.0),
@@ -109,122 +115,148 @@ class _TextEditorsPageState extends State<TextEditorsPage> {
                 border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              // Текст описания
               child: Text(
-                'Текстовые редакторы — это программные приложения, предназначенные для создания, редактирования и форматирования текстовых документов. Они являются основным инструментом для работы с текстом в различных сферах деятельности.',
+                'Описание ПО. Текстовые редакторы — это программные приложения, предназначенные для создания, редактирования и форматирования текстовых документов.',
                 style: TextStyle(fontSize: 16),
                 textAlign: TextAlign.justify,
               ),
             ),
 
-            // Вертикальный отступ
             SizedBox(height: 20),
 
-            // БЛОК 3: Горизонтальный ряд с изображением и списком
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ЛЕВАЯ ЧАСТЬ: Изображение (заменяем иконку на изображения)
-                Expanded(
-                  flex: 1,
-                  child: GestureDetector(
-                    // Обработчик нажатия для смены изображения
-                    onTap: changeImage,
-                    child: Container(
-                      height: 150,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: Image.asset(
-                          images[currentImageIndex], // Отображаем текущее изображение
-                          fit: BoxFit.cover, // Изображение заполняет контейнер
-                          // Обработчик ошибки, если изображение не найдено
-                          errorBuilder: (context, error, stackTrace) {
-                            return Center(
+            // ЗАДАНИЕ 1: Горизонтальный ListView с изображениями со скругленными углами
+            // Контейнер для горизонтального списка
+            Container(
+              height: 150,
+              child: ListView.builder( // создание списка
+                scrollDirection: Axis.horizontal,
+                itemCount: images.length,
+                itemBuilder: (context, index) { // создание каждого элемента списка
+                  return Container(
+                    width: 200,
+                    margin: EdgeInsets.only(right: 12.0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12.0),
+                      child: Image.asset(
+                        images[index],
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) { // обработчик ошибок
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(12.0),
+                              border: Border.all(color: Colors.grey),
+                            ),
+                            child: Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
-                                    Icons.error,
-                                    color: Colors.red,
+                                    Icons.image,
+                                    color: Colors.grey,
                                     size: 40,
                                   ),
                                   SizedBox(height: 8),
                                   Text(
-                                    'Изображение\nне найдено',
+                                    'Картинка ${index + 1}',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      color: Colors.red,
+                                      color: Colors.grey,
                                       fontSize: 12,
                                     ),
                                   ),
                                 ],
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
                       ),
                     ),
-                  ),
-                ),
-
-                SizedBox(width: 16),
-
-                // ПРАВАЯ ЧАСТЬ: Список примеров
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    height: 150,
-                    padding: EdgeInsets.all(12.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    // Вертикальный столбец со списком
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Text('1. FreeOffice', style: TextStyle(fontSize: 14)),
-                        Text('2. LibreOffice', style: TextStyle(fontSize: 14)),
-                        Text('3. WPSOffice', style: TextStyle(fontSize: 14)),
-                        Text('4. GoogleDocs', style: TextStyle(fontSize: 14)),
-                        Text('5. MicrosoftWord', style: TextStyle(fontSize: 14)),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(height: 20),
-
-            // Добавляем кнопку для альтернативного способа смены изображений
-            Center(
-              child: ElevatedButton(
-                onPressed: changeImage,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                ),
-                child: Text('Сменить изображение (${currentImageIndex + 1}/${images.length})'),
+                  );
+                },
               ),
             ),
 
             SizedBox(height: 20),
 
-            // БЛОК 4: Разделительная линия
+            // Заголовок для списка пунктов
+            Text(
+              'Список программ:',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            SizedBox(height: 10),
+
+            // ЗАДАНИЕ 2 и 3: Вертикальный ListView с карточками и SnackBar
+            Expanded(
+              child: ListView.builder( // Создание списка
+                itemCount: items.length,
+                itemBuilder: (context, index) { // создание каждого элемента списка
+                  final item = items[index];
+                  return Card( // каждый элемент списка является карточкой
+                    elevation: 3,
+                    margin: EdgeInsets.only(bottom: 12.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: ListTile( // шаблон содержимого
+                      // Иконка перед текстом
+                      leading: Icon(
+                        item['icon'],
+                        color: Colors.green,
+                        size: 32,
+                      ),
+                      // Название
+                      title: Text(
+                        item['title'],
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      // Короткое описание
+                      subtitle: Text(
+                        item['description'],
+                        style: TextStyle(fontSize: 14),
+                      ),
+                      // Иконка после текста
+                      trailing: Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.grey,
+                        size: 20,
+                      ),
+                      // При нажатии показывается SnackBar
+                      onTap: () { // при нажатии на элемент списка
+                        ScaffoldMessenger.of(context).showSnackBar( // поиск scafford
+                          SnackBar( // Уведомление
+                            content: Text('Выбран пункт: ${item['title']}'),
+                            duration: Duration(seconds: 2),
+                            backgroundColor: Colors.green,
+                            action: SnackBarAction(
+                              label: 'OK',
+                              textColor: Colors.white,
+                              onPressed: () {},
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // Разделительная линия
             Divider(thickness: 1, color: Colors.grey),
 
             SizedBox(height: 10),
 
-            // БЛОК 5: Информация о студенте
+            // Информация о студенте
             Row(
               children: [
-                // Контейнер с иконкой пользователя
                 Container(
                   width: 40,
                   height: 40,
@@ -239,16 +271,14 @@ class _TextEditorsPageState extends State<TextEditorsPage> {
                   ),
                 ),
                 SizedBox(width: 12),
-                // Контейнер с информацией о студенте
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(4.0),
                   ),
-                  // Текст с ФИО и группой
                   child: Text(
-                    'Королев А.В. группа ИКБО-26-22',
+                    'ФИО номер группы',
                     style: TextStyle(fontSize: 16),
                   ),
                 ),
