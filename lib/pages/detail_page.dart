@@ -9,7 +9,7 @@ class DetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Получаем данные, переданные из предыдущего экрана
     final Map<String, String>? item =
-        ModalRoute.of(context)?.settings.arguments as Map<String, String>?;
+    ModalRoute.of(context)?.settings.arguments as Map<String, String>?;
 
     // Если данные не переданы, показываем заглушку
     if (item == null) {
@@ -25,7 +25,7 @@ class DetailPage extends StatelessWidget {
       );
     }
 
-    // Получение иконки
+    // Получение иконки (используется как fallback)
     IconData icon;
     switch (item['icon']) {
       case 'description':
@@ -39,6 +39,9 @@ class DetailPage extends StatelessWidget {
         break;
       case 'cloud':
         icon = Icons.cloud;
+        break;
+      case 'edit_document':
+        icon = Icons.edit_document;
         break;
       default:
         icon = Icons.apps;
@@ -57,7 +60,7 @@ class DetailPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Карточка с изображением/иконкой
+              // Карточка с изображением
               Center(
                 child: Container(
                   width: double.infinity,
@@ -73,11 +76,29 @@ class DetailPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Center(
-                    child: Icon(
-                      icon,
-                      size: 100,
-                      color: Colors.green,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: item['image'] != null
+                        ? Image.asset(
+                      item['image']!,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        // Fallback на иконку при ошибке загрузки
+                        return Center(
+                          child: Icon(
+                            icon,
+                            size: 100,
+                            color: Colors.green,
+                          ),
+                        );
+                      },
+                    )
+                        : Center(
+                      child: Icon(
+                        icon,
+                        size: 100,
+                        color: Colors.green,
+                      ),
                     ),
                   ),
                 ),

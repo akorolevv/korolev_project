@@ -14,34 +14,46 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0; // Индекс выбранного пункта в NavigationBar
 
-  // Список изображений для горизонтального ListView
+  // Список изображений для горизонтального ListView (локальные из assets)
   final List<String> images = [
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/LibreOffice_Logo.svg/200px-LibreOffice_Logo.svg.png',
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/WPS_Office_logo.svg/200px-WPS_Office_logo.svg.png',
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/FreeOffice_logo.svg/200px-FreeOffice_logo.svg.png',
+    'assets/images/editor1.jpg', // FreeOffice
+    'assets/images/editor2.jpg', // LibreOffice
+    'assets/images/editor3.jpg', // WPS Office
+    'assets/images/editor4.jpg',
+    'assets/images/editor5.jpg',
   ];
 
-  // Список пунктов программ
+  // Список пунктов программ (5 редакторов)
   final List<Map<String, String>> items = [
     {
       'title': 'FreeOffice',
       'description': 'Бесплатный офисный пакет для работы с документами',
       'icon': 'description',
+      'image': 'assets/images/editor1.jpg',
     },
     {
       'title': 'LibreOffice',
       'description': 'Открытый офисный пакет с широким функционалом',
       'icon': 'library_books',
+      'image': 'assets/images/editor2.jpg',
     },
     {
       'title': 'WPS Office',
       'description': 'Кроссплатформенный офисный пакет',
       'icon': 'business_center',
+      'image': 'assets/images/editor3.jpg',
     },
     {
       'title': 'Google Docs',
       'description': 'Облачный офисный пакет от Google',
       'icon': 'cloud',
+      'image': 'assets/images/editor4.jpg',
+    },
+    {
+      'title': 'Microsoft Word',
+      'description': 'Профессиональный текстовый редактор от Microsoft',
+      'icon': 'edit_document',
+      'image': 'assets/images/editor5.jpg',
     },
   ];
 
@@ -56,6 +68,8 @@ class _HomePageState extends State<HomePage> {
         return Icons.business_center;
       case 'cloud':
         return Icons.cloud;
+      case 'edit_document':
+        return Icons.edit_document;
       default:
         return Icons.apps;
     }
@@ -81,12 +95,55 @@ class _HomePageState extends State<HomePage> {
   void _onItemTap(int index) {
     final item = items[index];
     _showSnackBar(item['title']!);
-    
+
     // Переход на экран детализации
     Navigator.pushNamed(
       context,
       Routes.detail,
       arguments: item, // Передаем данные пункта
+    );
+  }
+
+  /// Виджет для отображения локального изображения с fallback
+  Widget _buildImageWidget(String imagePath, {double? width, double? height, BoxFit fit = BoxFit.cover}) {
+    return Image.asset(
+      imagePath,
+      width: width,
+      height: height,
+      fit: fit,
+      errorBuilder: (context, error, stackTrace) {
+        // Fallback при ошибке загрузки
+        return Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade300,
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(color: Colors.grey),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.image,
+                  size: 40,
+                  color: Colors.grey,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Картинка',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -138,7 +195,7 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 16),
 
-            // Горизонтальный ListView с изображениями
+            // Горизонтальный ListView с изображениями (локальные)
             Container(
               height: 150,
               child: ListView.builder(
@@ -150,40 +207,10 @@ class _HomePageState extends State<HomePage> {
                     margin: const EdgeInsets.only(right: 12.0),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12.0),
-                      child: Image.network(
+                      child: _buildImageWidget(
                         images[index],
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          // Fallback при ошибке загрузки
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(12.0),
-                              border: Border.all(color: Colors.grey),
-                            ),
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.image,
-                                    size: 40,
-                                    color: Colors.grey,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Картинка ${index + 1}',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
+                        width: 200,
+                        height: 150,
                       ),
                     ),
                   );
@@ -228,10 +255,17 @@ class _HomePageState extends State<HomePage> {
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: ListTile(
-            leading: Icon(
-              _getIcon(item['icon']!),
-              color: Colors.green,
-              size: 32,
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: SizedBox(
+                width: 50,
+                height: 50,
+                child: _buildImageWidget(
+                  item['image']!,
+                  width: 50,
+                  height: 50,
+                ),
+              ),
             ),
             title: Text(
               item['title']!,
@@ -265,7 +299,7 @@ class _HomePageState extends State<HomePage> {
         crossAxisCount: 2, // 2 столбца
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 1.5, // Соотношение сторон карточки
+        childAspectRatio: 1.3, // Соотношение сторон карточки
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
@@ -283,10 +317,18 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    _getIcon(item['icon']!),
-                    color: Colors.green,
-                    size: 40,
+                  // Изображение вместо иконки
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      width: 60,
+                      height: 60,
+                      child: _buildImageWidget(
+                        item['image']!,
+                        width: 60,
+                        height: 60,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -370,9 +412,9 @@ class _HomePageState extends State<HomePage> {
 
     // Определяем платформу для адаптивных отступов
     final double platformPadding = (kIsWeb ||
-            Platform.isMacOS ||
-            Platform.isLinux ||
-            Platform.isWindows)
+        Platform.isMacOS ||
+        Platform.isLinux ||
+        Platform.isWindows)
         ? 20 // Больший отступ для десктоп и веб
         : 12; // Стандартный отступ для мобильных
 

@@ -72,7 +72,7 @@ class _LoadingPageState extends State<LoadingPage> {
 
               // Название приложения
               const Text(
-                'НАЗВАНИЕ ПРИЛОЖЕНИЯ',
+                'ТЕКСТОВЫЕ РЕДАКТОРЫ',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
