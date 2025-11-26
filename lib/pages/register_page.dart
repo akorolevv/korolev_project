@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/text_field.dart';
+import '../routes.dart';
 
 class RegisterPage extends StatelessWidget {
   RegisterPage({super.key});
@@ -17,7 +18,7 @@ class RegisterPage extends StatelessWidget {
   void _submit(BuildContext context) {
     // Проверяем валидность всех полей формы
     if (_formKey.currentState!.validate()) {
-      // Если все поля валидны, показываем уведомление
+      // Показываем уведомление об успешной регистрации
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -26,9 +27,16 @@ class RegisterPage extends StatelessWidget {
                 "Email: ${_emailController.text}",
           ),
           backgroundColor: Colors.green,
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 2),
         ),
       );
+
+      // Возвращаемся на экран авторизации после небольшой задержки
+      Future.delayed(const Duration(seconds: 2), () {
+        if (context.mounted) {
+          Navigator.pop(context);
+        }
+      });
     }
   }
 
@@ -91,7 +99,7 @@ class RegisterPage extends StatelessWidget {
                   CustomTextFormField(
                     inputType: InputFieldType.password,
                     labelText: "Пароль",
-                    hintText: "Минимум 6 символов",
+                    hintText: "Минимум 5 символов, только английские буквы",
                     prefIcon: const Icon(Icons.security),
                     controller: _passwordController,
                     textInputAction: TextInputAction.next,
@@ -108,8 +116,8 @@ class RegisterPage extends StatelessWidget {
                     hintText: "Введите пароль еще раз",
                     prefIcon: const Icon(Icons.security),
                     controller: _confirmPasswordController,
-                    // Передаем пароль для сравнения
-                    passwordToMatch: _passwordController.text,
+                    // Передаем контроллер основного пароля для сравнения
+                    passwordController: _passwordController,
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) {
                       // При нажатии Enter отправляем форму
@@ -162,8 +170,8 @@ class RegisterPage extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                          // Переход на экран входа
-                          Navigator.pushNamed(context, '/login');
+                          // Возвращаемся на экран входа
+                          Navigator.pop(context);
                         },
                         child: const Text(
                           "Войдите",
@@ -185,12 +193,4 @@ class RegisterPage extends StatelessWidget {
       ),
     );
   }
-}
-
-// Для тестирования экрана отдельно
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: RegisterPage(),
-  ));
 }

@@ -11,7 +11,7 @@ class CustomTextFormField extends StatefulWidget {
   final String hintText; // Текст подсказки
   final Icon prefIcon; // Иконка слева
   final TextEditingController controller; // Контроллер для управления текстом
-  final String? passwordToMatch; // Пароль для сравнения (для поля подтверждения)
+  final TextEditingController? passwordController; // Контроллер основного пароля для сравнения
   final TextInputAction? textInputAction; // Действие кнопки на клавиатуре
   final Function(String)? onFieldSubmitted; // Callback при нажатии Enter
 
@@ -22,7 +22,7 @@ class CustomTextFormField extends StatefulWidget {
     required this.hintText,
     required this.prefIcon,
     required this.controller,
-    this.passwordToMatch,
+    this.passwordController,
     this.textInputAction,
     this.onFieldSubmitted,
   });
@@ -60,24 +60,24 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
         break;
 
       case InputFieldType.password:
-      // Проверка: минимум 6 символов, буквы, цифры и символы +, _, -
-        if (value.length < 6) {
-          return "Пароль должен быть не менее 6 символов";
+      // Проверка: минимум 5 символов и только английские буквы
+        if (value.length < 5) {
+          return "Пароль должен быть не менее 5 символов";
         }
-        // Регулярное выражение: обязательно буквы, цифры и символы +, _, -
-        final hasLetters = RegExp(r'[A-Za-zА-Яа-я]').hasMatch(value);
-        final hasDigits = RegExp(r'\d').hasMatch(value);
-        final hasSpecial = RegExp(r'[+_\-]').hasMatch(value);
-
-        if (!hasLetters || !hasDigits || !hasSpecial) {
-          return "Пароль должен содержать буквы, цифры\nи символы (+, _, -)";
+        // Регулярное выражение: только английские буквы, цифры и спецсимволы
+        final hasOnlyEnglish = RegExp(r'^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};:,.<>?]+$').hasMatch(value);
+        if (!hasOnlyEnglish) {
+          return "Пароль должен содержать только английские символы";
         }
         break;
 
       case InputFieldType.confirmPassword:
-      // Проверка совпадения паролей
-        if (value != widget.passwordToMatch) {
-          return "Пароли не совпадают";
+      // Проверка совпадения паролей - используем контроллер для получения актуального значения
+        if (widget.passwordController != null) {
+          final passwordValue = widget.passwordController!.text;
+          if (value != passwordValue) {
+            return "Пароли не совпадают";
+          }
         }
         break;
     }

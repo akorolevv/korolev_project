@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/text_field.dart';
+import '../routes.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -15,16 +16,22 @@ class LoginPage extends StatelessWidget {
   void _submit(BuildContext context) {
     // Проверяем валидность всех полей формы
     if (_formKey.currentState!.validate()) {
-      // Если все поля валидны, показываем уведомление
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Вход выполнен!\nEmail: ${_emailController.text}",
+      // Если все поля валидны, переходим на основной экран
+      // Используем pushReplacementNamed, чтобы пользователь не мог вернуться на экран входа
+      Navigator.pushReplacementNamed(context, Routes.home);
+
+      // Показываем уведомление об успешном входе
+      Future.delayed(const Duration(milliseconds: 300), () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Вход выполнен!\nEmail: ${_emailController.text}",
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
           ),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+        );
+      });
     }
   }
 
@@ -93,7 +100,7 @@ class LoginPage extends StatelessWidget {
                   CustomTextFormField(
                     inputType: InputFieldType.password,
                     labelText: "Пароль",
-                    hintText: "Введите пароль",
+                    hintText: "Минимум 5 символов",
                     prefIcon: const Icon(Icons.security),
                     controller: _passwordController,
                     textInputAction: TextInputAction.done,
@@ -171,7 +178,7 @@ class LoginPage extends StatelessWidget {
                       GestureDetector(
                         onTap: () {
                           // Переход на экран регистрации
-                          Navigator.pushNamed(context, '/register');
+                          Navigator.pushNamed(context, Routes.register);
                         },
                         child: const Text(
                           "Зарегистрируйтесь",
@@ -193,12 +200,4 @@ class LoginPage extends StatelessWidget {
       ),
     );
   }
-}
-
-// Для тестирования экрана отдельно
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: LoginPage(),
-  ));
 }

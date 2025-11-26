@@ -35,7 +35,8 @@ class ProfilPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         title: const Text(
@@ -43,7 +44,6 @@ class ProfilPage extends StatelessWidget {
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF192252),
           ),
         ),
       ),
@@ -192,12 +192,4 @@ class ProfilPage extends StatelessWidget {
       ),
     );
   }
-}
-
-// Для тестирования экрана отдельно
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: ProfilPage(),
-  ));
 }
