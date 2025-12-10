@@ -1,9 +1,12 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import '../routes.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../models/editor.dart';
+import '../../routes.dart';
+import 'bloc/editors_bloc.dart';
 
-/// Основной экран приложения с навигацией
+/// Основной экран приложения с навигацией и BLoC
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -12,49 +15,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0; // Индекс выбранного пункта в NavigationBar
+  int _selectedIndex = 0;
 
-  // Список изображений для горизонтального ListView (локальные из assets)
+  // Список изображений для горизонтального ListView
   final List<String> images = [
-    'assets/images/editor1.jpg', // FreeOffice
-    'assets/images/editor2.jpg', // LibreOffice
-    'assets/images/editor3.jpg', // WPS Office
+    'assets/images/editor1.jpg',
+    'assets/images/editor2.jpg',
+    'assets/images/editor3.jpg',
     'assets/images/editor4.jpg',
     'assets/images/editor5.jpg',
-  ];
-
-  // Список пунктов программ (5 редакторов)
-  final List<Map<String, String>> items = [
-    {
-      'title': 'FreeOffice',
-      'description': 'Бесплатный офисный пакет для работы с документами',
-      'icon': 'description',
-      'image': 'assets/images/editor1.jpg',
-    },
-    {
-      'title': 'LibreOffice',
-      'description': 'Открытый офисный пакет с широким функционалом',
-      'icon': 'library_books',
-      'image': 'assets/images/editor2.jpg',
-    },
-    {
-      'title': 'WPS Office',
-      'description': 'Кроссплатформенный офисный пакет',
-      'icon': 'business_center',
-      'image': 'assets/images/editor3.jpg',
-    },
-    {
-      'title': 'Google Docs',
-      'description': 'Облачный офисный пакет от Google',
-      'icon': 'cloud',
-      'image': 'assets/images/editor4.jpg',
-    },
-    {
-      'title': 'Microsoft Word',
-      'description': 'Профессиональный текстовый редактор от Microsoft',
-      'icon': 'edit_document',
-      'image': 'assets/images/editor5.jpg',
-    },
   ];
 
   /// Получение иконки по имени
@@ -92,27 +61,31 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// Обработка нажатия на пункт списка
-  void _onItemTap(int index) {
-    final item = items[index];
-    _showSnackBar(item['title']!);
+  void _onItemTap(Editor editor) {
+    _showSnackBar(editor.title);
 
-    // Переход на экран детализации
+    // Переход на экран детализации с передачей данных
     Navigator.pushNamed(
       context,
       Routes.detail,
-      arguments: item, // Передаем данные пункта
+      arguments: {
+        'title': editor.title,
+        'description': editor.description,
+        'icon': editor.icon,
+        'image': editor.image,
+      },
     );
   }
 
-  /// Виджет для отображения локального изображения с fallback
-  Widget _buildImageWidget(String imagePath, {double? width, double? height, BoxFit fit = BoxFit.cover}) {
+  /// Виджет для отображения изображения с fallback
+  Widget _buildImageWidget(String imagePath,
+      {double? width, double? height, BoxFit fit = BoxFit.cover}) {
     return Image.asset(
       imagePath,
       width: width,
       height: height,
       fit: fit,
       errorBuilder: (context, error, stackTrace) {
-        // Fallback при ошибке загрузки
         return Container(
           width: width,
           height: height,
@@ -121,24 +94,15 @@ class _HomePageState extends State<HomePage> {
             borderRadius: BorderRadius.circular(12.0),
             border: Border.all(color: Colors.grey),
           ),
-          child: Center(
+          child: const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.image,
-                  size: 40,
-                  color: Colors.grey,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Картинка',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                ),
+                Icon(Icons.image, size: 40, color: Colors.grey),
+                SizedBox(height: 8),
+                Text('Картинка',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14, color: Colors.grey)),
               ],
             ),
           ),
@@ -147,11 +111,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// Виджет с основным содержимым экрана
+  /// Виджет с основным содержимым экрана (использует BLoC)
   Widget _buildMainContent(bool isWideScreen, double platformPadding) {
     return SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -165,7 +129,7 @@ class _HomePageState extends State<HomePage> {
               ),
               child: const Center(
                 child: Text(
-                  'Название ПО',
+                  'Текстовые редакторы',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -176,7 +140,7 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 16),
 
-            // Описание ПО
+            // Описание
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -186,17 +150,14 @@ class _HomePageState extends State<HomePage> {
                 border: Border.all(color: Colors.grey.shade300),
               ),
               child: const Text(
-                'Описание ПО. Текстовые редакторы — это программные приложения, предназначенные для создания, редактирования и форматирования текстовых документов.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF424F7B),
-                ),
+                'Текстовые редакторы — это программные приложения, предназначенные для создания, редактирования и форматирования текстовых документов.',
+                style: TextStyle(fontSize: 14, color: Color(0xFF424F7B)),
               ),
             ),
             const SizedBox(height: 16),
 
-            // Горизонтальный ListView с изображениями (локальные)
-            Container(
+            // Горизонтальный ListView с изображениями
+            SizedBox(
               height: 150,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
@@ -207,19 +168,16 @@ class _HomePageState extends State<HomePage> {
                     margin: const EdgeInsets.only(right: 12.0),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12.0),
-                      child: _buildImageWidget(
-                        images[index],
-                        width: 200,
-                        height: 150,
-                      ),
+                      child: _buildImageWidget(images[index],
+                          width: 200, height: 150),
                     ),
                   );
                 },
               ),
             ),
-            SizedBox(height: platformPadding), // Адаптивный отступ
+            SizedBox(height: platformPadding),
 
-            // Заголовок списка программ
+            // Заголовок списка
             const Text(
               'Список программ:',
               style: TextStyle(
@@ -230,10 +188,80 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 12),
 
-            // Вертикальный список или сетка в зависимости от ширины экрана
-            isWideScreen
-                ? _buildGridView(platformPadding)
-                : _buildListView(platformPadding),
+            // BlocBuilder для отображения списка на основе состояния
+            BlocBuilder<EditorsBloc, EditorsState>(
+              builder: (context, state) {
+                // Состояние: Загрузка
+                if (state is EditorsLoading) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(40.0),
+                      child: CircularProgressIndicator(color: Colors.green),
+                    ),
+                  );
+                }
+
+                // Состояние: Ошибка
+                if (state is EditorsError) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(40.0),
+                      child: Column(
+                        children: [
+                          const Icon(Icons.error_outline,
+                              size: 60, color: Colors.red),
+                          const SizedBox(height: 16),
+                          Text(
+                            state.message,
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.red),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              context
+                                  .read<EditorsBloc>()
+                                  .add(LoadEditorsEvent());
+                            },
+                            child: const Text('Повторить'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                // Состояние: Данные загружены
+                if (state is EditorsLoaded) {
+                  final editors = state.editors;
+
+                  if (editors.isEmpty) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(40.0),
+                        child: Text('Список пуст',
+                            style: TextStyle(fontSize: 16)),
+                      ),
+                    );
+                  }
+
+                  // Отображаем список или сетку
+                  return isWideScreen
+                      ? _buildGridView(editors, platformPadding)
+                      : _buildListView(editors, platformPadding);
+                }
+
+                // Начальное состояние (Initial) - fallback
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(40.0),
+                    child: Text('Загрузка данных...',
+                        style: TextStyle(fontSize: 16)),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -241,13 +269,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// Виджет ListView для узких экранов
-  Widget _buildListView(double platformPadding) {
+  Widget _buildListView(List<Editor> editors, double platformPadding) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: items.length,
+      itemCount: editors.length,
       itemBuilder: (context, index) {
-        final item = items[index];
+        final editor = editors[index];
         return Card(
           elevation: 3,
           margin: EdgeInsets.only(bottom: platformPadding),
@@ -260,89 +288,71 @@ class _HomePageState extends State<HomePage> {
               child: SizedBox(
                 width: 50,
                 height: 50,
-                child: _buildImageWidget(
-                  item['image']!,
-                  width: 50,
-                  height: 50,
-                ),
+                child: _buildImageWidget(editor.image, width: 50, height: 50),
               ),
             ),
             title: Text(
-              item['title']!,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              editor.title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            subtitle: Text(
-              item['description']!,
-              style: const TextStyle(fontSize: 14),
-            ),
-            trailing: const Icon(
-              Icons.arrow_forward_ios,
-              color: Colors.grey,
-              size: 20,
-            ),
-            onTap: () => _onItemTap(index),
+            subtitle: Text(editor.description,
+                style: const TextStyle(fontSize: 14)),
+            trailing: const Icon(Icons.arrow_forward_ios,
+                color: Colors.grey, size: 20),
+            onTap: () => _onItemTap(editor),
           ),
         );
       },
     );
   }
 
-  /// Виджет GridView для широких экранов (2 столбца)
-  Widget _buildGridView(double platformPadding) {
+  /// Виджет GridView для широких экранов
+  Widget _buildGridView(List<Editor> editors, double platformPadding) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, // 2 столбца
+        crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 1.3, // Соотношение сторон карточки
+        childAspectRatio: 1.3,
       ),
-      itemCount: items.length,
+      itemCount: editors.length,
       itemBuilder: (context, index) {
-        final item = items[index];
+        final editor = editors[index];
         return Card(
           elevation: 3,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: InkWell(
-            onTap: () => _onItemTap(index),
+            onTap: () => _onItemTap(editor),
             borderRadius: BorderRadius.circular(8.0),
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Изображение вместо иконки
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: SizedBox(
                       width: 60,
                       height: 60,
-                      child: _buildImageWidget(
-                        item['image']!,
-                        width: 60,
-                        height: 60,
-                      ),
+                      child:
+                      _buildImageWidget(editor.image, width: 60, height: 60),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    item['title']!,
+                    editor.title,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                        fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Expanded(
                     child: Text(
-                      item['description']!,
+                      editor.description,
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: 12),
                       overflow: TextOverflow.ellipsis,
@@ -358,37 +368,26 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// Виджет с профилем (заглушка)
+  /// Виджет с профилем
   Widget _buildProfileContent() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.account_circle,
-            size: 100,
-            color: Colors.green,
-          ),
+          const Icon(Icons.account_circle, size: 100, color: Colors.green),
           const SizedBox(height: 20),
           const Text(
             'Профиль пользователя',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
           const Text(
-            'ФИО номер группы',
-            style: TextStyle(
-              fontSize: 16,
-              color: Color(0xFF424F7B),
-            ),
+            'Королев Артем Вадимович',
+            style: TextStyle(fontSize: 16, color: Color(0xFF424F7B)),
           ),
           const SizedBox(height: 40),
           ElevatedButton.icon(
             onPressed: () {
-              // Переход на полный экран профиля
               Navigator.pushNamed(context, Routes.profile);
             },
             icon: const Icon(Icons.settings),
@@ -406,19 +405,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Определяем ширину экрана для адаптивного дизайна
     final mediaQuery = MediaQuery.of(context);
     final isWideScreen = mediaQuery.size.width > 600;
 
-    // Определяем платформу для адаптивных отступов
-    final double platformPadding = (kIsWeb ||
-        Platform.isMacOS ||
-        Platform.isLinux ||
-        Platform.isWindows)
-        ? 20 // Больший отступ для десктоп и веб
-        : 12; // Стандартный отступ для мобильных
+    final double platformPadding =
+    (kIsWeb || Platform.isMacOS || Platform.isLinux || Platform.isWindows)
+        ? 20
+        : 12;
 
-    // Список экранов для NavigationBar
     final List<Widget> screens = [
       _buildMainContent(isWideScreen, platformPadding),
       _buildProfileContent(),
@@ -427,7 +421,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'НАЗВАНИЕ ПРИЛОЖЕНИЯ',
+          'ТЕКСТОВЫЕ РЕДАКТОРЫ',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
