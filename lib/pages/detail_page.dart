@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 
 /// Экран детализации пункта
-/// Отображает подробную информацию о выбранном программном обеспечении
+/// Отображает подробную информацию о выбранном редакторе из БД
 class DetailPage extends StatelessWidget {
   const DetailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Получаем данные, переданные из предыдущего экрана
+    // Получаем данные, переданные из HomePage
     final Map<String, String>? item =
     ModalRoute.of(context)?.settings.arguments as Map<String, String>?;
 
-    // Если данные не переданы, показываем заглушку
     if (item == null) {
       return Scaffold(
         appBar: AppBar(
@@ -25,7 +24,7 @@ class DetailPage extends StatelessWidget {
       );
     }
 
-    // Получение иконки (используется как fallback)
+    // Получение иконки по имени
     IconData icon;
     switch (item['icon']) {
       case 'description':
@@ -83,27 +82,45 @@ class DetailPage extends StatelessWidget {
                       item['image']!,
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
-                        // Fallback на иконку при ошибке загрузки
                         return Center(
-                          child: Icon(
-                            icon,
-                            size: 100,
-                            color: Colors.green,
-                          ),
+                          child: Icon(icon, size: 100, color: Colors.green),
                         );
                       },
                     )
                         : Center(
-                      child: Icon(
-                        icon,
-                        size: 100,
-                        color: Colors.green,
-                      ),
+                      child: Icon(icon, size: 100, color: Colors.green),
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 30),
+
+              // ID из базы данных
+              const Text(
+                'ID в базе данных:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF424F7B),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '# ${item['id'] ?? 'N/A'}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF192252),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
 
               // Название
               const Text(
@@ -154,9 +171,9 @@ class DetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // Дополнительная информация
+              // Информация о хранилище
               const Text(
-                'Дополнительная информация:',
+                'Информация о хранении:',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -165,10 +182,9 @@ class DetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              _buildInfoRow(Icons.check_circle, 'Кроссплатформенность', 'Да'),
-              _buildInfoRow(Icons.language, 'Язык интерфейса', 'Русский, English'),
-              _buildInfoRow(Icons.star, 'Рейтинг', '4.5/5'),
-              _buildInfoRow(Icons.download, 'Загрузки', '1M+'),
+              _buildInfoRow(Icons.storage, 'База данных', 'SQLite (Drift)'),
+              _buildInfoRow(Icons.folder, 'Путь к изображению', item['image'] ?? 'N/A'),
+              _buildInfoRow(Icons.code, 'Иконка', item['icon'] ?? 'N/A'),
 
               const SizedBox(height: 40),
 
@@ -211,11 +227,7 @@ class DetailPage extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: Colors.green,
-            size: 24,
-          ),
+          Icon(icon, color: Colors.green, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -223,19 +235,17 @@ class DetailPage extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF424F7B),
-                  ),
+                  style: const TextStyle(fontSize: 14, color: Color(0xFF424F7B)),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF192252),
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

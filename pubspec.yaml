@@ -13,19 +13,32 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_bloc: ^9.1.1
 
+  # Drift - локальная SQL база данных
+  drift: ^2.29.0
+  drift_flutter: ^0.2.7
+  sqlite3_flutter_libs: ^0.5.0
+  path_provider: ^2.1.5
+
+  # DI-контейнер
+  get_it: ^9.0.5
+  injectable: ^2.6.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
 
+  # Кодогенерация для Drift и Injectable
+  drift_dev: ^2.29.0
+  injectable_generator: ^2.9.1
+  build_runner: ^2.10.4
+
 flutter:
   uses-material-design: true
 
-  # Добавляем ресурсы
   assets:
     - assets/images/
 
-  # Добавляем шрифты
   fonts:
     - family: CustomFont
       fonts:

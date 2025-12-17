@@ -2,7 +2,8 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../models/editor.dart';
+import '../../data/database/app_database.dart'; // Импорт типа Editor из Drift
+import '../../di/di.dart'; // Импорт DI-контейнера
 import '../../routes.dart';
 import 'bloc/editors_bloc.dart';
 
@@ -44,7 +45,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  /// Показать SnackBar с названием выбранного пункта
+  /// Показать SnackBar
   void _showSnackBar(String title) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -61,14 +62,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// Обработка нажатия на пункт списка
+  /// Используем тип Editor из Drift
   void _onItemTap(Editor editor) {
     _showSnackBar(editor.title);
 
-    // Переход на экран детализации с передачей данных
     Navigator.pushNamed(
       context,
       Routes.detail,
       arguments: {
+        'id': editor.id.toString(),
         'title': editor.title,
         'description': editor.description,
         'icon': editor.icon,
@@ -111,7 +113,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// Виджет с основным содержимым экрана (использует BLoC)
+  /// Основной контент с BLoC
   Widget _buildMainContent(bool isWideScreen, double platformPadding) {
     return SingleChildScrollView(
       child: Padding(
@@ -150,7 +152,9 @@ class _HomePageState extends State<HomePage> {
                 border: Border.all(color: Colors.grey.shade300),
               ),
               child: const Text(
-                'Текстовые редакторы — это программные приложения, предназначенные для создания, редактирования и форматирования текстовых документов.',
+                'Текстовые редакторы — это программные приложения для создания, '
+                    'редактирования и форматирования текстовых документов. '
+                    'Данные загружаются из локальной SQLite базы данных (Drift).',
                 style: TextStyle(fontSize: 14, color: Color(0xFF424F7B)),
               ),
             ),
@@ -179,7 +183,7 @@ class _HomePageState extends State<HomePage> {
 
             // Заголовок списка
             const Text(
-              'Список программ:',
+              'Список программ (из Drift БД):',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -188,10 +192,9 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 12),
 
-            // BlocBuilder для отображения списка на основе состояния
+            // BlocBuilder для отображения списка
             BlocBuilder<EditorsBloc, EditorsState>(
               builder: (context, state) {
-                // Состояние: Загрузка
                 if (state is EditorsLoading) {
                   return const Center(
                     child: Padding(
@@ -201,7 +204,6 @@ class _HomePageState extends State<HomePage> {
                   );
                 }
 
-                // Состояние: Ошибка
                 if (state is EditorsError) {
                   return Center(
                     child: Padding(
@@ -220,9 +222,7 @@ class _HomePageState extends State<HomePage> {
                           const SizedBox(height: 16),
                           ElevatedButton(
                             onPressed: () {
-                              context
-                                  .read<EditorsBloc>()
-                                  .add(LoadEditorsEvent());
+                              context.read<EditorsBloc>().add(LoadEditorsEvent());
                             },
                             child: const Text('Повторить'),
                           ),
@@ -232,7 +232,6 @@ class _HomePageState extends State<HomePage> {
                   );
                 }
 
-                // Состояние: Данные загружены
                 if (state is EditorsLoaded) {
                   final editors = state.editors;
 
@@ -240,24 +239,20 @@ class _HomePageState extends State<HomePage> {
                     return const Center(
                       child: Padding(
                         padding: EdgeInsets.all(40.0),
-                        child: Text('Список пуст',
-                            style: TextStyle(fontSize: 16)),
+                        child: Text('Список пуст', style: TextStyle(fontSize: 16)),
                       ),
                     );
                   }
 
-                  // Отображаем список или сетку
                   return isWideScreen
                       ? _buildGridView(editors, platformPadding)
                       : _buildListView(editors, platformPadding);
                 }
 
-                // Начальное состояние (Initial) - fallback
                 return const Center(
                   child: Padding(
                     padding: EdgeInsets.all(40.0),
-                    child: Text('Загрузка данных...',
-                        style: TextStyle(fontSize: 16)),
+                    child: Text('Загрузка данных...', style: TextStyle(fontSize: 16)),
                   ),
                 );
               },
@@ -268,7 +263,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// Виджет ListView для узких экранов
+  /// ListView для узких экранов (используем тип Editor из Drift)
   Widget _buildListView(List<Editor> editors, double platformPadding) {
     return ListView.builder(
       shrinkWrap: true,
@@ -295,10 +290,8 @@ class _HomePageState extends State<HomePage> {
               editor.title,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            subtitle: Text(editor.description,
-                style: const TextStyle(fontSize: 14)),
-            trailing: const Icon(Icons.arrow_forward_ios,
-                color: Colors.grey, size: 20),
+            subtitle: Text(editor.description, style: const TextStyle(fontSize: 14)),
+            trailing: const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 20),
             onTap: () => _onItemTap(editor),
           ),
         );
@@ -306,7 +299,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// Виджет GridView для широких экранов
+  /// GridView для широких экранов (используем тип Editor из Drift)
   Widget _buildGridView(List<Editor> editors, double platformPadding) {
     return GridView.builder(
       shrinkWrap: true,
@@ -338,16 +331,14 @@ class _HomePageState extends State<HomePage> {
                     child: SizedBox(
                       width: 60,
                       height: 60,
-                      child:
-                      _buildImageWidget(editor.image, width: 60, height: 60),
+                      child: _buildImageWidget(editor.image, width: 60, height: 60),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     editor.title,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Expanded(
@@ -368,7 +359,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// Виджет с профилем
+  /// Виджет профиля
   Widget _buildProfileContent() {
     return Center(
       child: Column(
@@ -414,7 +405,11 @@ class _HomePageState extends State<HomePage> {
         : 12;
 
     final List<Widget> screens = [
-      _buildMainContent(isWideScreen, platformPadding),
+      // BlocProvider создается здесь с использованием getIt (DI)
+      BlocProvider(
+        create: (_) => getIt<EditorsBloc>()..add(LoadEditorsEvent()),
+        child: _buildMainContent(isWideScreen, platformPadding),
+      ),
       _buildProfileContent(),
     ];
 

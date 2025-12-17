@@ -1,17 +1,20 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
-import '../../../data/editors_data.dart';
-import '../../../models/editor.dart';
+import 'package:injectable/injectable.dart';
+import '../../../data/repositories/editors_repository.dart';
+import '../../../data/database/app_database.dart';
 
 part 'editors_event.dart';
 part 'editors_state.dart';
 
 /// BLoC для управления состоянием списка редакторов
+/// @injectable - регистрируется как Factory (новый экземпляр при каждом запросе)
+@injectable
 class EditorsBloc extends Bloc<EditorsEvent, EditorsState> {
+  // Репозиторий внедряется через конструктор (DI)
+  final EditorsRepository repository;
 
-  /// Конструктор: устанавливаем начальное состояние и регистрируем обработчики
-  EditorsBloc() : super(EditorsInitial()) {
-    // Регистрация обработчика для события LoadEditorsEvent
+  EditorsBloc(this.repository) : super(EditorsInitial()) {
     on<LoadEditorsEvent>(_onLoadEditors);
   }
 
@@ -20,22 +23,18 @@ class EditorsBloc extends Bloc<EditorsEvent, EditorsState> {
       LoadEditorsEvent event,
       Emitter<EditorsState> emit,
       ) async {
-    // Переходим в состояние загрузки
     emit(EditorsLoading());
 
     try {
-      // Имитация задержки загрузки данных (например, из сети или БД)
-      await Future.delayed(const Duration(milliseconds: 800));
+      // Получаем данные из репозитория (который работает с Drift БД)
+      final editors = await repository.getAllEditors();
 
-      // Проверяем, есть ли данные
-      if (editorsData.isEmpty) {
+      if (editors.isEmpty) {
         emit(EditorsError('Список редакторов пуст'));
       } else {
-        // Успешная загрузка - передаем список редакторов
-        emit(EditorsLoaded(editorsData));
+        emit(EditorsLoaded(editors));
       }
     } catch (e) {
-      // В случае ошибки переходим в состояние ошибки
       emit(EditorsError('Ошибка загрузки: ${e.toString()}'));
     }
   }
